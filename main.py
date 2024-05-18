@@ -9,13 +9,13 @@ def sign() :
     r = HTTP.request('GET', SIGNURL, headers=HEADERS)
     if (r.status != 200) :
         print('!! 签到失败，错误的状态： ' + str(r.status))
-        ERROR = 1
+#        ERROR = 1
     # 获取最新魔力值
     print('-> 尝试更新魔力值')
     r = HTTP.request('GET', BASEURL, headers=HEADERS)
     if (r.status != 200) :
         print('!! 错误的状态： ' + str(r.status))
-        ERROR = 1
+#        ERROR = 1
     data = r.data.decode('utf-8')
     pattern = re.compile('<span\s*id=[\'|"]magic_num[\'|"]>([0-9,\.]+)\([\s\S]+\)</span>')
     mn = re.search(pattern, data)
@@ -25,7 +25,7 @@ def sign() :
         print('-> 签到成功，获得魔力值：' + str(d))
     else:
         print('!! 获取最新魔力值失败')
-        ERROR = 3
+ #       ERROR = 3
 
 def get_status() :
     global ERROR
@@ -42,6 +42,7 @@ def get_status() :
     pattern = re.compile('<a\s*href=[\'|"]userdetails\.php\?id=\d+[\'|"]\s*class=[\'|"].+[\'|"]\s*>\s*<b>\s*(.+)</b>\s*</a>')
     username = re.search(pattern, data)
     if username:
+        print('-> Privacy'+ STR(PRIVACY))
         if PRIVACY == '2':
             print('-> 当前用户：[保护]')
         elif PRIVACY == '3':
