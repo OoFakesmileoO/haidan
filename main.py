@@ -42,7 +42,7 @@ def get_status() :
     pattern = re.compile('<a\s*href=[\'|"]userdetails\.php\?id=\d+[\'|"]\s*class=[\'|"].+[\'|"]\s*>\s*<b>\s*(.+)</b>\s*</a>')
     username = re.search(pattern, data)
     if username:
-        print('-> Privacy'+ STR(PRIVACY))
+        print('-> Privacy'+ str(PRIVACY))
         if PRIVACY == '2':
             print('-> 当前用户：[保护]')
         elif PRIVACY == '3':
