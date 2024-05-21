@@ -129,7 +129,7 @@ def main() :
         MAGIC_NUM = 0
         HEADERS = {
             'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36 Edg/125.0.0.0',
-            'cookie': 'c_secure_login=' + _login + '; c_secure_uid=' + _uid + '; c_secure_pass=' + _pass + '; c_secure_tracker_ssl=' + _tracker_ssl + '; c_secure_ssl=' + _ssl,
+            'cookie': 'c_secure_uid=NDI0MjU%3D; c_secure_pass=7d90ea6a90c03810e9dd18e2104f2fb4; c_secure_ssl=eWVhaA%3D%3D; c_secure_tracker_ssl=eWVhaA%3D%3D; c_secure_login=bm9wZQ%3D%3D; cf_clearance=u9GjTjH34YbDIvQLP8GbOQV4m9o.rAvZk8L28L.604g-1715166111-1.0.1.1-I1lnkB3yrwih4JA1uNNZ4I0Xy1UfYT6z9aFqdUem5vcCzTICTBUMLlsX3RHV5jxR.jLJKl6iyAVQ2yGDIw.ybg; cf_clearance=2Kik5Dpukn8lQ7EhYhTBuRWFQWLyjx5YG5i.y3yppZ8-1716274984-1.0.1.1-eTVEeICTqklPBOlQa7VlRaCzVcq.UkcUcot6xkAqsaX4rBwYkuI3X6nwKxNt3NVyPYnFXfIPZPKLHDIrwkABBA',
         }
 
         get_status()
