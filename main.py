@@ -5,10 +5,12 @@ import urllib3
 def sign_in():
     # Define global variables
     global HEADERS
+    global BASEURL
     global SIGNURL
     global HTTP
 
     # Initialize SIGNURL
+    BASEURL = 'https://www.haidan.video/index.php'
     SIGNURL = 'https://www.haidan.video/signin.php'
 
     # Initialize HTTP PoolManager
@@ -21,6 +23,7 @@ def sign_in():
     }
 
     # Make the request
+    r = HTTP.request('GET', BASEURL, headers=HEADERS)
     r = HTTP.request('GET', SIGNURL, headers=HEADERS)
 
     # Check the response status
