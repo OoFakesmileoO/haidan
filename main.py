@@ -130,13 +130,6 @@ def main() :
         HEADERS = {
             'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36 Edg/125.0.0.0',
             'cookie': 'c_secure_login=' + _login + '; c_secure_uid=' + _uid + '; c_secure_pass=' + _pass + '; c_secure_tracker_ssl=' + _tracker_ssl + '; c_secure_ssl=' + _ssl,
-            'Sec-Ch-Ua:': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
-            'Sec-Ch-Ua-Mobile:': '?1',
-            'Sec-Ch-Ua-Platform:': '"Android"',
-            'Sec-Fetch-Dest:': 'document',
-            'Sec-Fetch-Mode:': 'navigate',
-            'Sec-Fetch-Site:': 'same-origin',
-            'Sec-Fetch-User:': '?1',
             'Upgrade-Insecure-Requests:': '1',
         }
 
