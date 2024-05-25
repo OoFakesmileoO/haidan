@@ -129,7 +129,25 @@ def main() :
         MAGIC_NUM = 0
         HEADERS = {
             'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36 Edg/125.0.0.0',
-            'cookie': 'c_secure_login=' + _login + '; c_secure_uid=' + _uid + '; c_secure_pass=' + _pass + '; c_secure_tracker_ssl=' + _tracker_ssl + '; c_secure_ssl=' + _ssl + ';cf_clearance=BUBztmSgdA6RkhgYOm5HzY2TrrPDkI.7W33qfC5Q7gY-1716594880-1.0.1.1-nS86itZ4qt2qJ8HujBSuVjyTA1KK0q0zUaCCS5eMvGKEFdOAM2ihVG5rzoR35Hxjuj0dUvugkqQmn6WcnjGt6Q',
+            'cookie': 'c_secure_login=' + _login + '; c_secure_uid=' + _uid + '; c_secure_pass=' + _pass + '; c_secure_tracker_ssl=' + _tracker_ssl + '; c_secure_ssl=' + _ssl,
+            ':authority:': 'www.haidan.video',
+            ':method:': 'GET',
+            ':path:': '/index.php',
+            ':scheme:': 'https',
+            'Accept:': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'Accept-Encoding:': 'gzip, deflate, br, zstd',
+            'Accept-Language:': 'zh-CN,zh;q=0.9',
+            'Cache-Control:': 'max-age=0',
+            'Priority:': 'u=0, i',
+            'Referer:': 'https://www.haidan.video/login.php',
+            'Sec-Ch-Ua:': '"Microsoft Edge";v="125", "Chromium";v="125", "Not.A/Brand";v="24"',
+            'Sec-Ch-Ua-Mobile:': '?1',
+            'Sec-Ch-Ua-Platform:': '"Android"',
+            'Sec-Fetch-Dest:': 'document',
+            'Sec-Fetch-Mode:': 'navigate',
+            'Sec-Fetch-Site:': 'same-origin',
+            'Sec-Fetch-User:': '?1',
+            'Upgrade-Insecure-Requests:': '1',
         }
 
         get_status()
