@@ -9,13 +9,13 @@ def sign() :
     r = HTTP.request('GET', SIGNURL, headers=HEADERS)
     if (r.status != 200) :
         print('!! 签到失败，错误的状态： ' + str(r.status))
-        #ERROR = 1
+        ERROR = 1
     # 获取最新魔力值
     print('-> 尝试更新魔力值')
     r = HTTP.request('GET', BASEURL, headers=HEADERS)
     if (r.status != 200) :
         print('!! 错误的状态： ' + str(r.status))
-        #ERROR = 1
+        ERROR = 1
     data = r.data.decode('utf-8')
     pattern = re.compile('<span\s*id=[\'|"]magic_num[\'|"]>([0-9,\.]+)\([\s\S]+\)</span>')
     mn = re.search(pattern, data)
@@ -25,7 +25,7 @@ def sign() :
         print('-> 签到成功，获得魔力值：' + str(d))
     else:
         print('!! 获取最新魔力值失败')
-        #ERROR = 3
+        ERROR = 3
 
 def get_status() :
     global ERROR
@@ -35,7 +35,7 @@ def get_status() :
     r = HTTP.request('GET', BASEURL, headers=HEADERS)
     if (r.status != 200) :
         print('!! 错误的状态： ' + str(r.status))
-        #ERROR = 1
+        ERROR = 1
     data = r.data.decode('utf-8')
 
     # 用户名
@@ -52,7 +52,7 @@ def get_status() :
             print('-> 当前用户：*' + username.group(1)[1:len(username.group(1)) - 1]  + '*')
     else:
         print('-> 登录身份过期或程序失效')
-        #ERROR = 2
+        ERROR = 2
 
     # 魔力值
     pattern = re.compile('<span\s*id=[\'|"]magic_num[\'|"]>([0-9,\.]+)\([\s\S]+\)</span>')
@@ -62,7 +62,7 @@ def get_status() :
         print('-> 当前魔力值：' + str(MAGIC_NUM))
     else:
         print('-> 登录身份过期或程序失效')
-        #ERROR = 2
+        ERROR = 2
 
     # 打卡状态
     pattern = re.compile('<input\s*type=[\'|"]submit[\'|"]\s*id=[\'|"]modalBtn[\'|"]\s*class=[\'|"]dt_button[\'|"]\s*value=[\'|"]已经打卡[\'|"][\s]*/[\s]*>')
@@ -128,7 +128,7 @@ def main() :
         # 初始化
         MAGIC_NUM = 0
         HEADERS = {
-            'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36 Edg/125.0.0.0',
+            'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Mobile Safari/537.36 Edg/111.0.1661.62',
             'cookie': 'c_secure_login=' + _login + '; c_secure_uid=' + _uid + '; c_secure_pass=' + _pass + '; c_secure_tracker_ssl=' + _tracker_ssl + '; c_secure_ssl=' + _ssl,
         }
 
