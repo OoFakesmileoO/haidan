@@ -1,12 +1,12 @@
 import os
 import re
-import urllib3
+import cloudscraper
 
 MAGIC_NUM = 0
 ERROR = 0
 BASEURL = 'https://www.haidan.video/index.php'
 SIGNURL = 'https://www.haidan.video/signin.php'
-HTTP = None
+scraper = None
 HEADERS = {}
 PRIVACY = ''
 
@@ -15,34 +15,50 @@ def sign():
     global MAGIC_NUM
 
     print('-> 正在签到...')
-    HEADERS['referer'] = BASEURL  # 添加 referer 以模拟正常访问
-    r = HTTP.request('GET', SIGNURL, headers=HEADERS)
-    if r.status != 200 and r.status != 302:
-        print('!! 签到失败，状态码：' + str(r.status))
+    HEADERS['Referer'] = BASEURL
+    try:
+        r = scraper.get(SIGNURL, headers=HEADERS, timeout=15)
+        print(f"签到响应状态码: {r.status_code}")
+        
+        if r.status_code not in (200, 302):
+            print(f"!! 签到失败，状态码：{r.status_code}")
+            print(f"响应开头预览: {r.text[:300]}")  # debug 用
+            ERROR = 1
+            return
+        
+        data = r.text
+        
+        # 检查是否已签到（根据常见中文提示匹配，可根据实际日志调整）
+        if any(word in data for word in ['已签到', '已经签到', '今日已签', '重复签到', 'Signed in']):
+            print('-> 今日已签到，无需重复')
+            return
+        
+        get_magic(data)
+    
+    except Exception as e:
+        print(f"签到异常: {str(e)}")
         ERROR = 1
-        return
-    data = r.data.decode('utf-8', errors='ignore')
-
-    # 检查响应是否表示已签到
-    if '已签到' in data or '已经签到' in data or '今日已签' in data:
-        print('-> 今日已签到，无需重复')
-        return
-
-    get_magic(data)
 
 def get_magic(data):
     global ERROR
-    pattern = re.compile(r'([0-9,\.]+)\([\s\S]+\)')
+    global MAGIC_NUM
+    
+    pattern = re.compile(r'([0-9,\.]+)\s*\([\s\S]*?\)')
     mn = re.search(pattern, data)
     if mn:
-        mn = float(mn.group(1).replace(',', ''))
-        d = mn - MAGIC_NUM
-        if d > 0:
-            print('-> 签到成功，获得魔力值：' + str(d))
-        else:
-            print('-> 签到无变化（可能已签到或解析失败）')
+        try:
+            mn_value = float(mn.group(1).replace(',', ''))
+            d = mn_value - MAGIC_NUM
+            if d > 0:
+                print(f'-> 签到成功，获得魔力值：{d}')
+            else:
+                print('-> 签到响应正常，但魔力无变化（可能已签到或解析偏移）')
+        except:
+            print('!! 魔力值解析失败')
+            ERROR = 3
     else:
-        print('!! 获取最新魔力值失败')
+        print('!! 未在响应中找到魔力值模式')
+        print(f"响应预览（前500字符）: {data[:500]}")
         ERROR = 3
 
 def get_status():
@@ -50,101 +66,130 @@ def get_status():
     global MAGIC_NUM
 
     print('-> 正在获取用户状态...')
-    r = HTTP.request('GET', BASEURL, headers=HEADERS)
-    if r.status != 200:
-        print('!! 错误的状态： ' + str(r.status))
-        ERROR = 1
-        return
-    data = r.data.decode('utf-8', errors='ignore')
-
-    # 用户名
-    pattern = re.compile(r'\s*\*\*\s*(.+)\*\*\s*')  # 更新正则以匹配可能的用户名格式
-    username = re.search(pattern, data)
-    if username:
-        uname = username.group(1)
-        if PRIVACY == '2':
-            print('-> 当前用户：[保护]')
-        elif PRIVACY == '3':
-            print('-> 当前用户：' + uname)
+    try:
+        r = scraper.get(BASEURL, headers=HEADERS, timeout=15)
+        print(f"状态页响应状态码: {r.status_code}")
+        
+        if r.status_code != 200:
+            print(f"!! 错误的状态： {r.status_code}")
+            print(f"响应开头预览: {r.text[:300]}")
+            ERROR = 1
+            return
+        
+        data = r.text
+        
+        # 用户名（部分隐藏等隐私逻辑）
+        pattern = re.compile(r'\s*\*\*\s*(.+?)\s*\*\*\s*')
+        username = re.search(pattern, data)
+        if username:
+            uname = username.group(1).strip()
+            if PRIVACY == '2':
+                print('-> 当前用户：[保护]')
+            elif PRIVACY == '3':
+                print(f'-> 当前用户：{uname}')
+            else:
+                if len(uname) > 2:
+                    print(f'-> 当前用户：*{uname[1:-1]}*')
+                else:
+                    print(f'-> 当前用户：{uname}')
         else:
-            print('-> 当前用户：*' + uname[1:len(uname) - 1] + '*')
-    else:
-        print('-> 登录身份过期或程序失效')
-        ERROR = 2
-        return
+            print('-> 未找到用户名，可能登录失效或页面结构变化')
+            ERROR = 2
+            return
 
-    # 魔力值
-    pattern = re.compile(r'([0-9,\.]+)\([\s\S]+\)')
-    mn = re.search(pattern, data)
-    if mn:
-        MAGIC_NUM = float(mn.group(1).replace(',', ''))
-        print('-> 当前魔力值：' + str(MAGIC_NUM))
-    else:
-        print('-> 登录身份过期或程序失效')
-        ERROR = 2
-        return
+        # 魔力值
+        pattern = re.compile(r'([0-9,\.]+)\s*\([\s\S]*?\)')
+        mn = re.search(pattern, data)
+        if mn:
+            MAGIC_NUM = float(mn.group(1).replace(',', ''))
+            print(f'-> 当前魔力值：{MAGIC_NUM}')
+        else:
+            print('-> 未找到魔力值，可能登录失效')
+            ERROR = 2
+            return
 
-    # 始终尝试签到
-    sign()
+        # 执行签到
+        sign()
+    
+    except Exception as e:
+        print(f"获取状态异常: {str(e)}")
+        ERROR = 1
 
 def main():
     print("=================================================")
-    print("||                 HaiDan Sign                 ||")
-    print("||                Author: Jokin                ||")
-    print("||               Version: v0.0.6               ||")
+    print("||              HaiDan Auto Sign               ||")
+    print("||         Fixed version with cloudscraper     ||")
     print("=================================================")
 
     global HEADERS
-    global HTTP
+    global scraper
     global PRIVACY
     global ERROR
     ERROR = 0
 
-    HTTP = urllib3.PoolManager()
+    # 初始化 cloudscraper，模拟真实浏览器
+    scraper = cloudscraper.create_scraper(
+        browser={
+            'browser': 'chrome',
+            'platform': 'windows',
+            'mobile': False,
+            'desktop': True
+        },
+        delay=8,          # 轻微延迟，模拟人类
+        debug=False
+    )
 
-    PRIVACY = os.getenv('HAIDAN_PRIVACY') if os.getenv('HAIDAN_PRIVACY') else '1'
+    PRIVACY = os.getenv('HAIDAN_PRIVACY') or '1'
 
-    _uid = os.getenv('HAIDAN_UID') if os.getenv('HAIDAN_UID') else False
-    _pass = os.getenv('HAIDAN_PASS') if os.getenv('HAIDAN_PASS') else False
-    _login = os.getenv('HAIDAN_LOGIN') if os.getenv('HAIDAN_LOGIN') else 'bm9wZQ%3D%3D'
-    _ssl = os.getenv('HAIDAN_SSL') if os.getenv('HAIDAN_SSL') else 'eWVhaA%3D%3D'
-    _tracker_ssl = os.getenv('HAIDAN_TRACKER_SSL') if os.getenv('HAIDAN_TRACKER_SSL') else 'eWVhaA%3D%3D'
-    _multi = os.getenv('HAIDAN_MULTI') if os.getenv('HAIDAN_MULTI') else False
+    _uid = os.getenv('HAIDAN_UID') or ''
+    _pass = os.getenv('HAIDAN_PASS') or ''
+    _login = os.getenv('HAIDAN_LOGIN') or 'bm9wZQ%3D%3D'
+    _ssl = os.getenv('HAIDAN_SSL') or 'eWVhaA%3D%3D'
+    _tracker_ssl = os.getenv('HAIDAN_TRACKER_SSL') or 'eWVhaA%3D%3D'
+    _multi = os.getenv('HAIDAN_MULTI') or False
 
-    if _multi == False:
-        if not _uid or not _pass:
-            print('!! 缺少设置： 环境变量/Secrets')
+    if not _uid or not _pass:
+        if not _multi:
+            print('!! 缺少必要 Secrets：HAIDAN_UID 和 HAIDAN_PASS')
             exit(4)
-        _multi = _uid + '@' + _pass
-    else:
-        print('-> 多账户支持已经启用')
 
-    # 多账户解析
-    sp = _multi.split(',')
-    for i in range(0, len(sp)):
-        print('-> 当前进度： ' + str(i + 1) + '/' + str(len(sp)))
-        account = sp[i].strip().split('@')
-        if len(account) != 2:
-            print('!! 多账户设置格式错误')
-            exit(5)
-        _uid = account[0]
-        _pass = account[1]
-        MAGIC_NUM = 0
+    accounts = []
+    if _multi:
+        print('-> 多账户模式已启用')
+        for acc in _multi.split(','):
+            acc = acc.strip()
+            if '@' in acc:
+                uid, pw = acc.split('@', 1)
+                accounts.append((uid.strip(), pw.strip()))
+    else:
+        accounts = [(_uid, _pass)]
+
+    for idx, (uid, pw) in enumerate(accounts, 1):
+        print(f'-> 处理账户 {idx}/{len(accounts)}')
         HEADERS = {
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36',
-            'cookie': 'c_secure_login=' + _login + '; c_secure_uid=' + _uid + '; c_secure_pass=' + _pass + '; c_secure_tracker_ssl=' + _tracker_ssl + '; c_secure_ssl=' + _ssl,
-            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'cookie': f'c_secure_login={_login}; c_secure_uid={uid}; c_secure_pass={pw}; '
+                      f'c_secure_tracker_ssl={_tracker_ssl}; c_secure_ssl={_ssl}',
         }
 
         get_status()
 
-    print('-> 已经完成本次任务')
+    print('-> 本次任务完成')
     if ERROR != 0:
-        print('!! 本次任务出现错误，请及时查看日志')
+        print('!! 任务有错误，请检查日志')
+        exit(ERROR)
     else:
-        print('-> 任务圆满完成')
-    exit(ERROR)
+        print('-> 全部成功')
+        exit(0)
 
 if __name__ == '__main__':
     main()
