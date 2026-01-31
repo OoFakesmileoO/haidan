@@ -2,7 +2,7 @@ name: HaiDan Check-in
 
 on:
   schedule:
-    - cron: '0 2,10,18 * *'  # UTC 时间，每天三次（对应国内凌晨2点、上午10点、晚上4点）
+    - cron: '0 2,10,18 * * *'  # UTC 时间，每天三次（对应国内凌晨2点、上午10点、晚上4点）
   workflow_dispatch:  # 支持手动触发
   push:
 
