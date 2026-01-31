@@ -1,37 +1,28 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
-
-name: HaiDan Sign
+name: HaiDan Check-in
 
 on:
-  push:
-    branches: [ master, dev ]
-  pull_request:
-    branches: [ master, dev ]
   schedule:
-    # UTC 时间 PRC每天凌晨2点、上午10点和晚上4点执行一次```
-    - cron: 0 18,2,8 * * *
+    - cron: '0 2,10,18 * *'  # UTC 时间，每天三次（对应国内凌晨2点、上午10点、晚上4点）
+  workflow_dispatch:  # 支持手动触发
 
 jobs:
-  build:
-
+  checkin:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.8
-      uses: actions/setup-python@v5
-      with:
-        python-version: 3.8
-    - name: Install dependencies
-      run: |
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Run
-      env:
-        HAIDAN_UID: ${{ secrets.HAIDAN_UID }}
-        HAIDAN_PASS: ${{ secrets.HAIDAN_PASS }}
-        HAIDAN_LOGIN: ${{ secrets.HAIDAN_LOGIN }}
-        HAIDAN_MULTI: ${{ secrets.HAIDAN_MULTI }}
-        HAIDAN_PRIVACY: ${{ secrets.HAIDAN_PRIVACY }}
-      run: |
-        python main.py
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run script
+        env:
+          HAIDAN_UID: ${{ secrets.HAIDAN_UID }}
+          HAIDAN_PASS: ${{ secrets.HAIDAN_PASS }}
+          HAIDAN_LOGIN: ${{ secrets.HAIDAN_LOGIN }}
+          HAIDAN_SSL: ${{ secrets.HAIDAN_SSL }}
+          HAIDAN_TRACKER_SSL: ${{ secrets.HAIDAN_TRACKER_SSL }}
+          HAIDAN_MULTI: ${{ secrets.HAIDAN_MULTI }}
+          HAIDAN_PRIVACY: ${{ secrets.HAIDAN_PRIVACY }}
+        run: python main.py
