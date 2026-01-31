@@ -19,7 +19,16 @@ def sign():
     try:
         r = scraper.get(SIGNURL, headers=HEADERS, timeout=15)
         print(f"签到响应状态码: {r.status_code}")
+                # Debug: 打印页面前1500字符，帮助定位用户名和魔力位置
+        print("=== DEBUG: index.php 页面内容预览 (前1500字符) ===")
+        print(data[:1500])
+        print("=== DEBUG 结束 ===")
         
+        # 额外尝试打印是否包含常见关键词
+        if '欢迎' in data or '用户' in data or '魔力' in data or '积分' in data:
+            print("页面包含关键词：欢迎/用户/魔力/积分 → 很可能已登录")
+        else:
+            print("页面未包含常见登录后关键词 → 可能仍为登录页或重定向")
         if r.status_code not in (200, 302):
             print(f"!! 签到失败，状态码：{r.status_code}")
             print(f"响应开头预览: {r.text[:300]}")  # debug 用
