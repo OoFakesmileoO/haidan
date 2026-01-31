@@ -178,4 +178,25 @@ def main():
         'cookie': (
             f'c_secure_login={_login}; '
             f'c_secure_uid={_uid}; '
-            f'c_secure_pass={_pass};
+            f'c_secure_pass={_pass}; '
+            f'c_secure_tracker_ssl={_tracker_ssl}; '
+            f'c_secure_ssl={_ssl}; '
+            f'cf_clearance={_cf_clearance}'
+        ).strip('; '),
+    }
+
+    print('-> 使用 Cookie (含 cf_clearance):')
+    print(f"   cf_clearance: {_cf_clearance[:40]}... (长度 {len(_cf_clearance)})")
+    print('-> 开始执行签到逻辑')
+
+    get_status()
+
+    print('-> 任务执行完毕')
+    if ERROR == 0:
+        print('-> 看起来一切正常（但请检查是否真的签到成功）')
+    else:
+        print(f'!! 任务有错误 (code {ERROR})，请查看上面日志')
+    exit(ERROR)
+
+if __name__ == '__main__':
+    main()
